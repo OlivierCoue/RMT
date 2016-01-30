@@ -1,0 +1,49 @@
+<div ng-controller="manageReportController as manageReport">	
+
+	<a href="#/"><button type="button" class="btn btn-primary">Back</button></a>
+	
+	<div class="page-header">
+		<h1>Manage report {{ report.name }}</h1>
+	</div>
+	<div style="max-height: 800px; overflow: auto;" class="row">
+		<div class="col-md-12">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th ng-repeat="colName in report.data.colNames track by $index">{{ colName }}</th>
+						<th>Last comment</th>
+						<th>Select</th>					
+					</tr>
+				</thead>
+				<tbody>	              
+					<tr ng-repeat="row in report.data.rows">
+						<td>{{ row.id }}</td>		                
+						<td ng-repeat="value in row.vals track by $index">{{ value }}</td>
+						<td>{{ row.lastComment }}</td>
+						<td><a href="" ng-click="manageReport.selectReport(row.id)"><button type="button" class="btn btn-primary">Select</button></a></td> 
+					</tr>	             
+				</tbody>
+			</table>
+		</div>              
+	</div>
+
+	<div ng-if="!selectedReport.isNull">
+		<h2>Comments</h2>
+		<div style="max-height: 500px; overflow: auto;" class="list-group">
+			<a ng-repeat="comment in selectedReport.comments" href="" class="list-group-item">
+		    	<h4 class="list-group-item-heading">{{ comment.comment }}</h4>
+		    	<p class="list-group-item-text">by user</p>
+		  	</a>			
+		</div>
+		<form ng-submit="manageReport.postComment()" class="form-group" id="commentForm">
+		  <label for="comment">Post a comment for entry n°{{ selectedReport.id }}</label>
+		  <textarea required class="form-control" rows="5" id="commentContent"></textarea>
+		  <button id="sendCommentButton" type="submit" class="btn btn-lg btn-default">Send</button>
+		</form>
+	</div>
+	<div ng-if="selectedReport.isNull">
+		 <label for="comment">Select a report to post comment</label>
+	</div>
+</div>
+

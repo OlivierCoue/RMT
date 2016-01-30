@@ -1,0 +1,14 @@
+{
+	"id": "1",
+	"name": "Marking Compo",
+	"descr": "errors on parts marking composition",
+	"data" :{
+			"colNames": ["FG","MarkngInstruction","MarkingComposition","BoxLabel" ],
+			"rows":[ 
+						{"id": 1, "vals":["DB3","DB3","DB3","DB4" ], "lastComment":"ca marche bien"},
+						{"id": 2, "vals":["DB3","DB3","DB3","DB4" ], "lastComment":"ca marche bien 2"},
+						{"id": 3, "vals":["FG-TMY84","FG-TMY94","FG-TMY84","FG-TMY84" ], "lastComment":"ca marche bien 3"},
+						{"id": 4, "vals":["RT-SMA55","RT-SMA55","RT-SMA57","RT-SMA55" ], "lastComment":"ca marche bien 4"}			
+			]
+	}
+}

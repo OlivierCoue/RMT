@@ -1,0 +1,27 @@
+<div class="page-header">
+	<h1>Available report types</h1>
+</div>
+<div class="row">
+	<div class="col-md-12">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Description</th>
+					<th>Count</th>
+					<th>Link</th>
+				</tr>
+			</thead>
+			<tbody>	              
+				<tr ng-repeat="reportType in reportTypes">	                
+					<td>{{ reportType.id }}</td>
+					<td>{{ reportType.name }}</td>
+					<td>{{ reportType.descr }}</td>
+					<td>123</td>
+					<th><a href="#error/{{ reportType.id }}"><button type="button" class="btn btn-primary">Go</button></a></th>	                
+				</tr>	             
+			</tbody>
+		</table>
+	</div>              
+</div>
