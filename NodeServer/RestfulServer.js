@@ -41,7 +41,7 @@ router.get('/ReportTypes', function(req, res) {
 	sql.connect(config).then(function() {
 	   // Query
 	   new sql.Request().query('select ID as id,name,description as descr  from dbo.ReportTypes').then(function(recordset) {
-	   	console.dir("get on ReportTypes");
+	   	console.log("get on ReportTypes");
 	   	res.json(recordset);
 	   }).catch(function(err) {
 			// ... query error checks 
@@ -66,7 +66,7 @@ router.get('/Report/:reportID', function(req, res) {
 		console.log("could not connect to database:"+err);
 	});
 
-		new sql.Request().query('select distinct b.CollumNames as colNames from dbo.errors a INNER JOIN dbo.Reports b on a.ReportID = b.ReportID where a.ReportID = '+req.params.reportID).then(function(recordset) {
+		new sql.Request().query('select CollumnNames as colNames from dbo.ReportTypes WHERE ID = '+req.params.reportID).then(function(recordset) {
 			recordset.push(val);
 			res.json(recordset);
 		}).catch(function(err) {
