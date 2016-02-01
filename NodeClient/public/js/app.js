@@ -1,9 +1,9 @@
 var myApp=angular.module("myApp",['ngRoute']);
 
-var get_reportTypes="//192.168.0.8:3000/RMTapi/ReportTypes";
-var get_reportData="//192.168.0.8:3000/RMTapi/Report";
-var post_comment="//192.168.0.8:3000/RMTapi/Comment";
-var get_comment="//192.168.0.8:3000/RMTapi/Comment";
+var get_reportTypes="//localhost:3000/RMTapi/ReportTypes";
+var get_reportData="//localhost:3000/RMTapi/Report";
+var post_comment="//localhost:3000/RMTapi/Comment";
+var get_comment="//localhost:3000/RMTapi/Comment";
 
 myApp.config(['$routeProvider',
   function($routeProvider) {
