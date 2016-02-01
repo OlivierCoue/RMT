@@ -4,6 +4,7 @@ var get_reportTypes="//localhost:3000/RMTapi/ReportTypes";
 var get_reportData="//localhost:3000/RMTapi/Report";
 var post_comment="//localhost:3000/RMTapi/Comment";
 var get_comment="//localhost:3000/RMTapi/Comment";
+var post_postpone ="//localhost:3000/RMTapi/Postpone";
 
 myApp.config(['$routeProvider',
   function($routeProvider) {
@@ -83,6 +84,30 @@ myApp.controller('manageReportController', ['$rootScope', '$scope', '$http', '$c
 		    }
 		);
 	};
+
+	this.postPostpone = function(){
+		
+		var params = {
+			errorID: $scope.selectedReport.id,
+			date: $("#postponeDateInput").val()
+		}
+		$http({
+           method: 'POST',
+           url: post_postpone,                    
+           data: params
+        }).then(function(response) {               
+           }, function(response) {           		
+               console.log("Request failed : "+response.statusText );                        
+           }
+        );
+        for(var i=0; i<$scope.report.data.rows.length; i++){
+			if($scope.report.data.rows[i].id == $scope.selectedReport.id){
+				$scope.report.data.rows[i] = null;				
+				break;
+			}
+		}
+		$scope.selectedReport.isNull = true;
+	}
 
 	/* post comment related to row selected */
 	var canComment = true;

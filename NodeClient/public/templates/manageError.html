@@ -17,7 +17,7 @@
 					</tr>
 				</thead>
 				<tbody>	              
-					<tr ng-repeat="row in report.data.rows">
+					<tr ng-repeat="row in report.data.rows" ng-if="row.id">
 						<td>{{ row.id }}</td>		                
 						<td ng-repeat="value in row.vals track by $index">{{ value }}</td>
 						<td>{{ row.lastComment }}</td>
@@ -29,6 +29,12 @@
 	</div>
 
 	<div ng-if="!selectedReport.isNull">
+		<h2>Postpone</h2>
+		<form ng-submit="manageReport.postPostpone()">
+			<input id="postponeDateInput"  type="date" />
+			<button type="submit"  ng-model="postponeDate" class="btn btn-primary">Postpone</button>
+		</form>
+
 		<h2>Comments</h2>
 		<div style="max-height: 500px; overflow: auto;" class="list-group">
 			<a ng-repeat="comment in selectedReport.comments" href="" class="list-group-item">
