@@ -1,10 +1,14 @@
 var myApp=angular.module("myApp",['ngRoute']);
 
-var get_reportTypes="//localhost:3000/RMTapi/ReportTypes";
-var get_reportData="//localhost:3000/RMTapi/Report";
-var post_comment="//localhost:3000/RMTapi/Comment";
-var get_comment="//localhost:3000/RMTapi/Comment";
-var post_postpone ="//localhost:3000/RMTapi/Postpone";
+var HOST = "//localhost:3000";
+
+var get_reportTypes = HOST+"/RMTapi/ReportTypes";
+var get_reportData = HOST+"/RMTapi/Report";
+var post_comment = HOST+"/RMTapi/Comment";
+var get_comment = HOST+"/RMTapi/Comment";
+var patch_postpone = HOST+"/RMTapi/Postpone";
+var get_postponeReportDate = HOST+"/RMTapi/PostponedReport";
+var patch_unpostpone = HOST+"/RMTapi/Unpostpone";
 
 myApp.config(['$routeProvider',
   function($routeProvider) {
@@ -40,11 +44,15 @@ myApp.controller('selectReportController', ['$scope', '$http', '$compile', '$loc
 
 }]);
 
+var CURRENT_REPORTS_MODE = 1;
+var POSTPONED_REPORTS_MODE = 2;
+
+
 myApp.controller('manageReportController', ['$rootScope', '$scope', '$http', '$compile', '$location', '$window', '$routeParams', function ($rootScope, $scope, $http, $compile, $location, $window, $routeParams) {
 	$scope.repportId = $routeParams.errorId;
 	$scope.report = null;
 	$scope.selectedReportId = null;
-
+	$scope.displayMode = null;
 	/* found selected report type in $rootScope.reportTypes */
 	for(var i=0; i<$rootScope.reportTypes.length; i++){
 		if($rootScope.reportTypes[i].id == $scope.repportId){
@@ -52,26 +60,52 @@ myApp.controller('manageReportController', ['$rootScope', '$scope', '$http', '$c
 			break;
 		}
 	}
+	
+	/* get current reports related to selected types */
+	this.getCurrentReports = function(){		
+		$scope.displayMode = CURRENT_REPORTS_MODE;		
+	    $http.get(get_reportData+"/"+$scope.repportId).
+		    then(function(response) {
+		    	if(response.data != "" && response.data != null){ 
+			    	$scope.report.data = {};
+			    	$scope.report.data.colNames = JSON.parse(response.data[0].colNames);                     	       
+			       	$scope.report.data.rows  = response.data[1];
+			       	for(var i=0; i<$scope.report.data.rows.length; i++){
+			       		$scope.report.data.rows[i].vals = JSON.parse($scope.report.data.rows[i].vals);
+			       	}	       	       
+		       }
+		    }, function(response) {
+		        console.log("Request failed : "+response.statusText );                        
+		    }
+		);
+	};
+	/* init */
+	this.getCurrentReports();
 
-	/* get reports related to selected types */
-    $http.get(get_reportData+"/"+$scope.repportId).
-	    then(function(response) {
-	    	if(response.data != "" && response.data != null){ 
-		    	$scope.report.data = {};
-		    	$scope.report.data.colNames = JSON.parse(response.data[0].colNames);                     	       
-		       	$scope.report.data.rows  = response.data[1];
-		       	for(var i=0; i<$scope.report.data.rows.length; i++){
-		       		$scope.report.data.rows[i].vals = JSON.parse($scope.report.data.rows[i].vals);
-		       	}	       	       
-	       }
-	    }, function(response) {
-	        console.log("Request failed : "+response.statusText );                        
-	    }
-	);
+	/* get postponed reports related to selected types */
+	this.getPostponedReports = function(){
+		$scope.selectedReport.isNull = true;
+		$scope.displayMode = POSTPONED_REPORTS_MODE;		
+	    $http.get(get_postponeReportDate+"/"+$scope.repportId).
+		    then(function(response) {
+		    	if(response.data != "" && response.data != null){ 
+			    	$scope.report.data = {};
+			    	$scope.report.data.colNames = JSON.parse(response.data[0].colNames);                     	       
+			       	$scope.report.data.rows  = response.data[1];
+			       	for(var i=0; i<$scope.report.data.rows.length; i++){
+			       		$scope.report.data.rows[i].vals = JSON.parse($scope.report.data.rows[i].vals);
+			       	}	       	       
+		       }
+		    }, function(response) {
+		        console.log("Request failed : "+response.statusText );                        
+		    }
+		);
+	};
 
 	$scope.selectedReport = {
 		isNull: true
 	};
+	
 	/* save the id of row selected */
 	this.selectReport = function(id){
 		$scope.selectedReport.isNull = false;
@@ -92,8 +126,8 @@ myApp.controller('manageReportController', ['$rootScope', '$scope', '$http', '$c
 			date: $("#postponeDateInput").val()
 		}
 		$http({
-           method: 'POST',
-           url: post_postpone,                    
+           method: 'PATCH',
+           url: patch_postpone,                    
            data: params
         }).then(function(response) {               
            }, function(response) {           		
@@ -101,13 +135,34 @@ myApp.controller('manageReportController', ['$rootScope', '$scope', '$http', '$c
            }
         );
         for(var i=0; i<$scope.report.data.rows.length; i++){
-			if($scope.report.data.rows[i].id == $scope.selectedReport.id){
+			if($scope.report.data.rows[i] != null && $scope.report.data.rows[i].id == $scope.selectedReport.id){
 				$scope.report.data.rows[i] = null;				
 				break;
 			}
 		}
 		$scope.selectedReport.isNull = true;
 	}
+
+	this.patchUnpostpone = function(errorId){
+		var params = {
+			errorID: errorId,			
+		}
+		$http({
+           method: 'PATCH',
+           url: patch_unpostpone,                    
+           data: params
+        }).then(function(response) {               
+           }, function(response) {           		
+               console.log("Request failed : "+response.statusText );                        
+           }
+        );
+        for(var i=0; i<$scope.report.data.rows.length; i++){
+			if($scope.report.data.rows[i] != null && $scope.report.data.rows[i].id == errorId){
+				$scope.report.data.rows[i] = null;				
+				break;
+			}
+		}
+	};
 
 	/* post comment related to row selected */
 	var canComment = true;

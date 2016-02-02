@@ -74,6 +74,9 @@ var port = process.env.PORT || 3000;        // set our port
 // ROUTES 
 var router = express.Router();              // get an instance of the express Router
 
+/*	@params
+/*	~
+/*/
 router.get('/ReportTypes', function(req, res) {
 	var promise=SQLSelect('select ID as id,name,description as descr  from dbo.ReportTypes');
 	promise.then(
@@ -83,6 +86,9 @@ router.get('/ReportTypes', function(req, res) {
 	console.log("get on ReportTypes");
 });
 
+/*	@params
+/*	errorID 	integer
+/*/
 router.get('/Report/:reportID', function(req, res) {
 	var promise=SQLSelect('select ID as id, valeurs as vals from dbo.errors where state=\'visible\'and ReportID = '+req.params.reportID);
 	promise.then(
@@ -100,6 +106,29 @@ router.get('/Report/:reportID', function(req, res) {
 	console.log("get on Report/"+req.params.reportID);
 });
 
+/*	@params
+/*	errorID 	integer
+/*/
+router.get('/PostponedReport/:reportID', function(req, res) {
+	var promise=SQLSelect('select ID as id, valeurs as vals, postponeDate as postponeDate from dbo.errors where state=\'hidden\'and ReportID = '+req.params.reportID);
+	promise.then(
+		function(recordset){var  val = recordset;
+			promise2=SQLSelect('select CollumnNames as colNames from dbo.ReportTypes WHERE ID = '+req.params.reportID);
+			promise2.then(
+				function(recordset){
+					recordset.push(val);
+					res.json(recordset);},
+				function(err){console.log(err);}
+			)
+		},
+		function(err){console.log(err);}
+	)
+	console.log("get on Report/"+req.params.reportID);
+});
+
+/*	@params
+/*	errorID 	integer
+/*/
 router.get('/Comment/:errorID',function(req,res){
 	var promise=SQLSelect('select Comment as comment from dbo.comments where errorID = '+req.params.errorID+' ORDER BY insertionDate');
 	promise.then(
@@ -109,6 +138,10 @@ router.get('/Comment/:errorID',function(req,res){
 	console.log("get on Comment/"+req.params.errorID);
 });
 
+/*	@params
+/*	errorId 	integer
+/*	comment 	String
+/*/
 router.post('/Comment',function(req,res){
 	var promise=SQLInsert('INSERT INTO [dbo].[comments]([errorID],[userID],[Comment])VALUES('+req.body.errorId+',1,'+req.body.comment+')');
 	promise.then(
@@ -118,16 +151,31 @@ router.post('/Comment',function(req,res){
 	console.log("post on Comment/"+req.body.errorId);
 });
 
-router.post('/Postpone',function(req,res){
-	//date format 2008-11-11
+/*	@params
+/*	errorID 	integer
+/*	date 		date format yyyy-MM-dd
+/*/
+router.patch('/Postpone',function(req,res){
 	var promise=SQLInsert('UPDATE [dbo].[errors]  SET [postponeDate] = \''+req.body.date+'\',[state] = \'hidden\' WHERE ID = '+req.body.errorID);
 	promise.then(
 		function(success){res.json();},
 		function(err){console.log(err);}
 	)
+	console.log("patch on /Postpone");
 });
 
 
+/*	@params
+/*	errorID
+/*/
+router.patch('/Unpostpone',function(req,res){	
+	var promise=SQLInsert('UPDATE [dbo].[errors]  SET [postponeDate] = NULL,[state] = \'visible\' WHERE ID = '+req.body.errorID);
+	promise.then(
+		function(success){res.json();},
+		function(err){console.log(err);}
+	)
+	console.log("patch on /Unpostpone");
+});
 
 
 // REGISTER  ROUTES

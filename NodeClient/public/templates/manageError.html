@@ -4,6 +4,8 @@
 	
 	<div class="page-header">
 		<h1>Manage report {{ report.name }}</h1>
+		<button ng-if="displayMode == 1" ng-click="manageReport.getPostponedReports()" type="button" class="btn btn-warning">Show postponed reports</button>
+		<button ng-if="displayMode == 2" ng-click="manageReport.getCurrentReports()" type="button" class="btn btn-info">Show current reports</button>
 	</div>
 	<div style="max-height: 800px; overflow: auto;" class="row">
 		<div class="col-md-12">
@@ -12,44 +14,49 @@
 					<tr>
 						<th>ID</th>
 						<th ng-repeat="colName in report.data.colNames track by $index">{{ colName }}</th>
-						<th>Last comment</th>
-						<th>Select</th>					
+						<th ng-if="displayMode == 1">Last comment</th>
+						<th ng-if="displayMode == 2">Postpone date</th>
+						<th ng-if="displayMode == 1" >Select</th>
+						<th ng-if="displayMode == 2" >Unpostpone</th>					
 					</tr>
 				</thead>
 				<tbody>	              
-					<tr ng-repeat="row in report.data.rows" ng-if="row.id">
+					<tr ng-repeat="row in report.data.rows track by $index" ng-if="row.id">
 						<td>{{ row.id }}</td>		                
 						<td ng-repeat="value in row.vals track by $index">{{ value }}</td>
-						<td>{{ row.lastComment }}</td>
-						<td><a href="" ng-click="manageReport.selectReport(row.id)"><button type="button" class="btn btn-primary">Select</button></a></td> 
+						<td ng-if="displayMode == 1">{{ row.lastComment }}</td>
+						<td ng-if="displayMode == 2">{{ row.postponeDate | date:"yyyy/MM/dd" }}</td>
+						<td ng-if="displayMode == 1" ><a href="" ng-click="manageReport.selectReport(row.id)"><button type="button" class="btn btn-primary">Select</button></a></td> 
+						<th ng-if="displayMode == 2" ><a href="" ng-click="manageReport.patchUnpostpone(row.id)"><button type="button" class="btn btn-primary">Unpostpone</button></th>		
 					</tr>	             
 				</tbody>
 			</table>
 		</div>              
 	</div>
+	<div ng-if="displayMode == 1">
+		<div ng-if="!selectedReport.isNull">
+			<h2>Postpone</h2>
+			<form ng-submit="manageReport.postPostpone()">
+				<input required id="postponeDateInput"  type="date" />
+				<button type="submit"  ng-model="postponeDate" class="btn btn-primary">Postpone</button>
+			</form>
 
-	<div ng-if="!selectedReport.isNull">
-		<h2>Postpone</h2>
-		<form ng-submit="manageReport.postPostpone()">
-			<input id="postponeDateInput"  type="date" />
-			<button type="submit"  ng-model="postponeDate" class="btn btn-primary">Postpone</button>
-		</form>
-
-		<h2>Comments</h2>
-		<div style="max-height: 500px; overflow: auto;" class="list-group">
-			<a ng-repeat="comment in selectedReport.comments" href="" class="list-group-item">
-		    	<h4 class="list-group-item-heading">{{ comment.comment }}</h4>
-		    	<p class="list-group-item-text">by user</p>
-		  	</a>			
+			<h2>Comments</h2>
+			<div style="max-height: 500px; overflow: auto;" class="list-group">
+				<a ng-repeat="comment in selectedReport.comments" href="" class="list-group-item">
+			    	<h4 class="list-group-item-heading">{{ comment.comment }}</h4>
+			    	<p class="list-group-item-text">by user</p>
+			  	</a>			
+			</div>
+			<form ng-submit="manageReport.postComment()" class="form-group" id="commentForm">
+			  <label for="comment">Post a comment for entry n°{{ selectedReport.id }}</label>
+			  <textarea required class="form-control" rows="5" id="commentContent"></textarea>
+			  <button id="sendCommentButton" type="submit" class="btn btn-lg btn-default">Send</button>
+			</form>
 		</div>
-		<form ng-submit="manageReport.postComment()" class="form-group" id="commentForm">
-		  <label for="comment">Post a comment for entry n°{{ selectedReport.id }}</label>
-		  <textarea required class="form-control" rows="5" id="commentContent"></textarea>
-		  <button id="sendCommentButton" type="submit" class="btn btn-lg btn-default">Send</button>
-		</form>
-	</div>
-	<div ng-if="selectedReport.isNull">
-		 <label for="comment">Select a report to post comment</label>
+		<div ng-if="selectedReport.isNull">
+			 <label for="comment">Select a report to post comment</label>
+		</div>
 	</div>
 </div>
 
