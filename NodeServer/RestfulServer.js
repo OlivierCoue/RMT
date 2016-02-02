@@ -42,7 +42,7 @@ function  SQLSelect(queryString){
 	});
 };
 
-function SQLInsert(queryString){
+function SQLTransac(queryString){
 	return new Promise(function(resolve,reject){
 	 	sql.connect(config).then(function() {
 		   // Query
@@ -83,11 +83,11 @@ router.get('/ReportTypes', function(req, res) {
 	console.log("get on ReportTypes");
 });
 
-router.get('/Report/:reportID', function(req, res) {
-	var promise=SQLSelect('select ID as id, valeurs as vals from dbo.errors where state=\'visible\'and ReportID = '+req.params.reportID);
+router.get('/Report/:reportTypesID', function(req, res) {
+	var promise=SQLSelect('select ID as id, valeurs as vals from dbo.errors where state=\'visible\'and reportID = '+req.params.reportTypesID);
 	promise.then(
 		function(recordset){var  val = recordset;
-			promise2=SQLSelect('select CollumnNames as colNames from dbo.ReportTypes WHERE ID = '+req.params.reportID);
+			promise2=SQLSelect('select CollumnNames as colNames from dbo.ReportTypes WHERE ID = '+req.params.reportTypesID);
 			promise2.then(
 				function(recordset){
 					recordset.push(val);
@@ -97,7 +97,7 @@ router.get('/Report/:reportID', function(req, res) {
 		},
 		function(err){console.log(err);}
 	)
-	console.log("get on Report/"+req.params.reportID);
+	console.log("get on Report/"+req.params.reportTypesID);
 });
 
 router.get('/Comment/:errorID',function(req,res){
@@ -110,7 +110,7 @@ router.get('/Comment/:errorID',function(req,res){
 });
 
 router.post('/Comment',function(req,res){
-	var promise=SQLInsert('INSERT INTO [dbo].[comments]([errorID],[userID],[Comment])VALUES('+req.body.errorId+',1,'+req.body.comment+')');
+	var promise=SQLTransac('INSERT INTO [dbo].[comments]([errorID],[userID],[Comment])VALUES('+req.body.errorId+',1,'+req.body.comment+')');
 	promise.then(
 		function(success){res.json();},
 		function(err){console,log(err);}
@@ -120,9 +120,17 @@ router.post('/Comment',function(req,res){
 
 router.post('/Postpone',function(req,res){
 	//date format 2008-11-11
-	var promise=SQLInsert('UPDATE [dbo].[errors]  SET [postponeDate] = \''+req.body.date+'\',[state] = \'hidden\' WHERE ID = '+req.body.errorID);
+	var promise=SQLTransac('UPDATE [dbo].[errors]  SET [postponeDate] = \''+req.body.date+'\',[state] = \'hidden\' WHERE ID = '+req.body.errorID);
 	promise.then(
 		function(success){res.json();},
+		function(err){console.log(err);}
+	)
+});
+
+router.get('/hiddenErrors/:reportTypesID',function(req,res){
+	var promise=SQLSelect('select ID as id, valeurs as vals,postponeDate from dbo.errors where state=\'hidden\'and reportID = '+req.params.reportTypesID);
+	promise.then(
+		function(recordset){res.json(recordset);},
 		function(err){console.log(err);}
 	)
 });
